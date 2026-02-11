@@ -1,0 +1,16 @@
+{
+  "name": "Boxing Timer V5",
+  "short_name": "BoxTimer",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#2196F3",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2950/2950645.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
