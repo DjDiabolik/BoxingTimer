@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reindirizzamento...</title>
+    <script>
+        // Prende il percorso attuale (es: /boxingtimer/ o /bOxInGtImEr)
+        var path = window.location.pathname;
+        var lowerPath = path.toLowerCase();
+
+        // Se l'utente ha scritto boxingtimer in qualsiasi modo sbagliato
+        if (lowerPath.includes("boxingtimer") && !path.includes("BoxingTimer")) {
+            // Sostituisce la versione sbagliata con quella corretta
+            var newPath = path.replace(/boxingtimer/i, "BoxingTimer");
+            window.location.replace(newPath);
+        } else {
+            // Se proprio non c'entra nulla, rimanda alla home principale
+            window.location.replace("/BoxingTimer/");
+        }
+    </script>
+</head>
+<body>
+    <p>Reindirizzamento in corso...</p>
+</body>
+</html>
