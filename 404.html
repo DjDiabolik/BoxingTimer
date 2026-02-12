@@ -1,24 +1,71 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
-    <title>Reindirizzamento...</title>
-    <script>
-        // Prende il percorso attuale (es: /boxingtimer/ o /bOxInGtImEr)
-        var path = window.location.pathname;
-        var lowerPath = path.toLowerCase();
-
-        // Se l'utente ha scritto boxingtimer in qualsiasi modo sbagliato
-        if (lowerPath.includes("boxingtimer") && !path.includes("BoxingTimer")) {
-            // Sostituisce la versione sbagliata con quella corretta
-            var newPath = path.replace(/boxingtimer/i, "BoxingTimer");
-            window.location.replace(newPath);
-        } else {
-            // Se proprio non c'entra nulla, rimanda alla home principale
-            window.location.replace("/BoxingTimer/");
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boxing Timer - Reindirizzamento</title>
+    <style>
+        body {
+            background-color: #121212; /* Dark mode come la tua app */
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
         }
-    </script>
+        .box {
+            border: 2px solid #e74c3c; /* Rosso "ring" */
+            padding: 30px;
+            border-radius: 15px;
+            background-color: #1e1e1e;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        h1 { margin-bottom: 10px; color: #e74c3c; }
+        p { font-size: 1.1rem; opacity: 0.9; }
+        #timer {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #f1c40f; /* Giallo avviso */
+            display: block;
+            margin-top: 15px;
+        }
+    </style>
 </head>
 <body>
-    <p>Reindirizzamento in corso...</p>
+
+    <div class="box">
+        <h1>URL NON CORRETTO</h1>
+        <p>Ti stiamo riportando sul ring...</p>
+        <span id="timer">3</span>
+    </div>
+
+    <script>
+        var count = 3;
+        var countdownDisplay = document.getElementById("timer");
+
+        // Gestione del countdown visivo
+        var countdownTrigger = setInterval(function() {
+            count--;
+            countdownDisplay.textContent = count;
+            if (count <= 0) clearInterval(countdownTrigger);
+        }, 1000);
+
+        // Logica di reindirizzamento (dopo 3 secondi)
+        setTimeout(function() {
+            var path = window.location.pathname;
+            var lowerPath = path.toLowerCase();
+            var newPath = "/BoxingTimer/"; // Destinazione di default
+
+            if (lowerPath.includes("boxingtimer") && !path.includes("BoxingTimer")) {
+                newPath = path.replace(/boxingtimer/i, "BoxingTimer");
+            }
+
+            window.location.replace(newPath);
+        }, 3000); 
+    </script>
 </body>
 </html>
