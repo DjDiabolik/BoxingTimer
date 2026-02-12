@@ -1,4 +1,4 @@
-const CACHE_NAME = 'boxing-timer-v5.2.2';
+const CACHE_NAME = 'boxing-timer-v5.3-beta';
 const assets = ['./', './index.html', './manifest.json', './icon.png'];
 
 self.addEventListener('install', e => {
