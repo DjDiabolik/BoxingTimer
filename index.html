@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <link rel="manifest" href="manifest.json">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>BOXING TIMER V5.2.2</title>
+<title>BOXING TIMER V5.3 (BETA)</title>
 
 <style>
 :root { --bg:#121212; --fight:#1b5e20; --rest:#b71c1c; --accent:#2196F3; --panel:#1e1e1e; }
@@ -79,7 +79,7 @@ button{ padding:18px;font-size:1.1rem; border:none;border-radius:12px; color:whi
 <body>
 
 <button id="fs-btn" onclick="toggleFullscreen()">⛶ FULLSCREEN</button>
-<div id="total-display">SESSIONE: <span id="total-time">00:00</span></div>
+<div id="total-display">SESSIONE 5.3: <span id="total-time">00:00</span></div>
 <button id="settings-btn" onclick="toggleSettings()">⚙️</button>
 
 <div id="round-display">ROUND 1</div>
@@ -93,7 +93,7 @@ button{ padding:18px;font-size:1.1rem; border:none;border-radius:12px; color:whi
 
 <div id="settings-panel">
     <div class="setting-section">
-        <h3>PRESET ALLENAMENTO</h3>
+        <h3>PRESET ALLENAMENTO (V5.3)</h3>
         <div id="presets-list"></div>
         
         <div id="active-preset-controls" style="display:none; margin-bottom:15px; padding:10px; background:rgba(33, 150, 243, 0.1); border-radius:8px; border:1px dashed var(--accent)">
@@ -139,18 +139,14 @@ function releaseWakeLock() { if (wakeLock) { wakeLock.release(); wakeLock = null
 function ensureAudio() {
     if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
-        // Compressore per pompare il suono e distorcerlo senza tagli del sistema
         compressor = audioCtx.createDynamicsCompressor();
         compressor.threshold.setValueAtTime(-10, audioCtx.currentTime);
         compressor.knee.setValueAtTime(40, audioCtx.currentTime);
         compressor.ratio.setValueAtTime(12, audioCtx.currentTime);
         compressor.attack.setValueAtTime(0, audioCtx.currentTime);
         compressor.release.setValueAtTime(0.25, audioCtx.currentTime);
-
         masterGain = audioCtx.createGain();
         masterGain.gain.setValueAtTime(6.0, audioCtx.currentTime); 
-        
         compressor.connect(masterGain);
         masterGain.connect(audioCtx.destination);
     }
@@ -162,18 +158,13 @@ function play(f, t, d) {
     const now = audioCtx.currentTime;
     const o = audioCtx.createOscillator();
     const g = audioCtx.createGain();
-    
     o.type = t; 
     o.frequency.setValueAtTime(f, now);
-    
-    // Taglio netto immediato (zero fade)
     g.gain.setValueAtTime(3.0, now);
     g.gain.setValueAtTime(3.0, now + d);
-    g.gain.setValueAtTime(0.001, now + d + 0.001); // Chiusura "atomica" per evitare click ma restare immediato
-    
+    g.gain.setValueAtTime(0.001, now + d + 0.001); 
     o.connect(g); 
     g.connect(compressor);
-    
     o.start(now); 
     o.stop(now + d + 0.01);
 }
@@ -209,6 +200,7 @@ function renderPhases() {
                 <div class="type-toggle ${p.type==='fight'?'type-fight':'type-rest'}" onclick="config.phases[${idx}].type=(config.phases[${idx}].type==='fight'?'rest':'fight');renderPhases();save();calculateTotals()">
                     ${p.type==='fight'?'LAVORO':'RIPOSO'}
                 </div>
+                <button onclick="clonePhase(${idx})" style="background:#444; border:none; padding:8px 12px; border-radius:5px; color:white; margin-right:5px">📄</button>
                 <button onclick="config.phases.splice(${idx},1);renderPhases();save();calculateTotals()" style="background:#444; border:none; padding:8px 12px; border-radius:5px; color:white">✕</button>
             </div>
             ${p.type==='fight' ? `
@@ -225,7 +217,25 @@ function renderPhases() {
 }
 
 function moveP(i, d) { [config.phases[i], config.phases[i+d]] = [config.phases[i+d], config.phases[i]]; save(); renderPhases(); }
-function addPhase() { config.phases.push({type:'fight', dur:60, random:{active:false, min:5, max:10}}); save(); renderPhases(); }
+
+function addPhase() {
+    let newPhase;
+    if (config.phases.length > 0) {
+        newPhase = JSON.parse(JSON.stringify(config.phases[config.phases.length - 1]));
+    } else {
+        newPhase = {type:'fight', dur:60, random:{active:false, min:5, max:10}};
+    }
+    config.phases.push(newPhase);
+    save();
+    renderPhases();
+}
+
+function clonePhase(idx) {
+    const cloned = JSON.parse(JSON.stringify(config.phases[idx]));
+    config.phases.splice(idx + 1, 0, cloned);
+    save();
+    renderPhases();
+}
 
 function renderPresets() {
     const c = document.getElementById("presets-list"); c.innerHTML = "";
@@ -391,14 +401,11 @@ function resetTimer() {
 }
 
 load(); initTimer();
-
-// Registrazione del Service Worker per l'uso offline
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js');
   });
 }
-
 </script>
 </body>
 </html>
