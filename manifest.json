@@ -1,10 +1,10 @@
 {
-  "name": "Boxing Timer V5.2.2",
-  "short_name": "BoxingTimer5.2.2",
+  "name": "Boxing Timer 5.3 BETA",
+  "short_name": "BoxingTime-5.3BETA",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#121212",
-  "theme_color": "#2196F3",
+  "theme_color": "#1b5e20",
   "orientation": "portrait",
   "icons": [
     {
