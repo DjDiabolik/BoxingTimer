@@ -2,9 +2,9 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="./manifest.json">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>BOXING TIMER V5.3 (BETA)</title>
+<title>BOXING TIMER V5.4</title>
 
 <style>
 :root { --bg:#121212; --fight:#1b5e20; --rest:#b71c1c; --accent:#2196F3; --panel:#1e1e1e; }
@@ -79,7 +79,7 @@ button{ padding:18px;font-size:1.1rem; border:none;border-radius:12px; color:whi
 <body>
 
 <button id="fs-btn" onclick="toggleFullscreen()">⛶ FULLSCREEN</button>
-<div id="total-display">SESSIONE 5.3: <span id="total-time">00:00</span></div>
+<div id="total-display">SESSIONE: <span id="total-time">00:00</span></div>
 <button id="settings-btn" onclick="toggleSettings()">⚙️</button>
 
 <div id="round-display">ROUND 1</div>
@@ -93,7 +93,7 @@ button{ padding:18px;font-size:1.1rem; border:none;border-radius:12px; color:whi
 
 <div id="settings-panel">
     <div class="setting-section">
-        <h3>PRESET ALLENAMENTO (V5.3)</h3>
+        <h3>PRESET ALLENAMENTO (V5.4)</h3>
         <div id="presets-list"></div>
         
         <div id="active-preset-controls" style="display:none; margin-bottom:15px; padding:10px; background:rgba(33, 150, 243, 0.1); border-radius:8px; border:1px dashed var(--accent)">
@@ -420,7 +420,7 @@ if ('serviceWorker' in navigator) {
         newWorker.addEventListener('statechange', () => {
           // Se l'aggiornamento è installato e l'app era già aperta
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            // Ricarica la pagina UNA SOLA VOLTA per attivare la 5.3
+            // Ricarica la pagina UNA SOLA VOLTA per attivare la nuova versione
             window.location.reload();
           }
         });
