@@ -400,17 +400,11 @@ function resetTimer() {
     initTimer();
 }
 
-load(); initTimer();
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js');
-  });
-}
-
+// 1. CARICAMENTO DATI E INIZIALIZZAZIONE (una volta sola)
 load(); 
 initTimer();
 
-// REGISTRAZIONE SERVICE WORKER CON REFRESH INTELLIGENTE
+// 2. REGISTRAZIONE SERVICE WORKER CON REFRESH INTELLIGENTE
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').then(reg => {
@@ -420,7 +414,7 @@ if ('serviceWorker' in navigator) {
         newWorker.addEventListener('statechange', () => {
           // Se l'aggiornamento è installato e l'app era già aperta
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            // Ricarica la pagina UNA SOLA VOLTA per attivare la nuova versione
+            // Ricarica la pagina per attivare la nuova versione (es. la 5.4)
             window.location.reload();
           }
         });
