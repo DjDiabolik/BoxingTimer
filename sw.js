@@ -1,13 +1,15 @@
-const CACHE_NAME = 'boxing-timer-v5.4.1';
+const CACHE_NAME = 'boxing-timer-v5.4.2'; // Aggiornato a 5.4.2
 const assets = ['./', './index.html', './manifest.json', './icon.png'];
 
 self.addEventListener('install', e => {
   self.skipWaiting(); // Forza l'attivazione immediata del nuovo SW
-  e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(assets)));
+  e.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(assets))
+  );
 });
 
 self.addEventListener('activate', e => {
-  // Pulisce le vecchie cache per liberare spazio e aggiornare i file
+  // Pulisce TUTTE le vecchie cache (v5.4.1 e precedenti)
   e.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(keys.map(key => {
@@ -15,9 +17,13 @@ self.addEventListener('activate', e => {
       }));
     })
   );
-  self.clients.claim(); // Prende il controllo immediato della pagina
+  self.clients.claim(); // Prende il controllo della pagina immediatamente
 });
 
+// NUOVA LOGICA: Prova prima a scaricare dal server (Network), 
+// se fallisce (offline) usa la cache.
 self.addEventListener('fetch', e => {
-  e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
+  e.respondWith(
+    fetch(e.request).catch(() => caches.match(e.request))
+  );
 });
