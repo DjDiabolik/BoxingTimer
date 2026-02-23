@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<link rel="manifest" href="./manifest.json">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>BOXING TIMER V6.0 BETA</title>
+
+<style>
+:root { --bg:#121212; --fight:#2e7d32; --rest:#d32f2f; --accent:#2196F3; --panel:#1e1e1e; }
+*{box-sizing:border-box}
+html,body{
+    overscroll-behavior:none;
+    height:100%;width:100%;margin:0;
+    background:var(--bg);color:white;
+    font-family:system-ui,sans-serif;
+    user-select:none;
+    touch-action: manipulation;
+}
+body{
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:space-between;
+    padding:40px 0;transition:background .2s;
+    opacity: 1 !important;
+}
+body.fight-mode{background:var(--fight)}
+body.rest-mode{background:var(--rest)}
+
+#round-display{font-size:3rem;font-weight:800}
+#status-display{font-size:1.8rem;letter-spacing:2px;text-transform:uppercase}
+#time-display{ font-size:clamp(8rem,25vw,12rem); font-weight:900; font-variant-numeric:tabular-nums; margin:20px 0 }
+
+.controls{display:flex;gap:20px;z-index:10}
+button{ padding:18px;font-size:1.1rem; border:none;border-radius:12px; color:white;font-weight:bold; background:rgba(255,255,255,.15); backdrop-filter:blur(5px); cursor:pointer; }
+#btn-toggle{background:var(--accent);min-width:160px; font-size:1.5rem}
+
+#fs-btn { position:absolute;top:20px;left:20px; font-size:0.9rem; padding:10px; background:rgba(255,255,255,.1); border-radius:10px; z-index:30; }
+#settings-btn{ position:absolute;top:20px;right:20px; font-size:1.8rem; padding:10px; background:none; border:none; color:inherit; }
+#total-display{ position:absolute;top:20px;left:50%;transform:translateX(-50%); font-size:1rem; opacity:.85; z-index:20; }
+
+#settings-panel{ position:fixed;inset:0; background:rgba(0,0,0,.98); display:none; flex-direction:column; align-items:center; padding:70px 20px 20px; z-index:1000; overflow-y: auto; }
+.setting-section { width: 100%; max-width: 450px; margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 15px; }
+.setting-section h3 { color: var(--accent); margin-bottom: 12px; font-size: 1.1rem; }
+
+/* Wrapper per le due viste del menù */
+.view-container { width: 100%; display: flex; flex-direction: column; align-items: center; max-width: 450px; }
+
+.realtime-stats { background: #222; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.85rem; border: 1px solid #333; }
+.realtime-stats div { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.stat-val { font-weight: bold; color: var(--accent); }
+
+.preset-item { display: flex; align-items: center; gap: 5px; margin-bottom: 8px; }
+.btn-preset-load { flex-grow: 1; padding: 12px; background: #333; text-align: left; border-radius: 8px; font-size: 0.9rem; }
+.btn-preset-load.active { border: 2px solid var(--accent); }
+.btn-preset-icon { background: #444; padding: 12px; border-radius: 8px; width: 44px; display:flex; justify-content:center; align-items:center; cursor:pointer; border:none; color:white; }
+.btn-preset-del { background: #b71c1c; }
+
+#phases-list { width: 100%; margin-bottom: 15px; }
+.phase-item { background: #222; margin-bottom: 10px; border-radius: 10px; border: 1px solid #333; overflow: hidden; }
+.phase-header { display: flex; align-items: center; gap: 8px; padding: 8px; background: #2a2a2a; }
+
+.sort-controls { display: flex; flex-direction: column; gap: 2px; }
+.btn-sort { background: #444; color: #ccc; width: 30px; height: 24px; border-radius: 4px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; border: none; }
+.btn-sort:disabled { opacity: 0.2; }
+
+.phase-dur-input { width: 60px; padding: 10px 5px; background: #111; color: white; border: 1px solid #444; border-radius: 5px; text-align: center; font-weight:bold; }
+.type-toggle { flex-grow: 1; padding: 12px; border-radius: 5px; text-align: center; font-weight: bold; cursor: pointer; font-size: 0.8rem; }
+.type-fight { background: var(--fight); }
+.type-rest { background: var(--rest); opacity: 0.7; }
+
+.phase-random-settings { background: #1a1a1a; padding: 10px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #333; font-size: 0.8rem; }
+.random-toggle-btn { padding: 6px 10px; border-radius: 4px; background: #333; color: #888; border:none; }
+.random-active { background: var(--accent); color: white; }
+.random-inputs { display: flex; align-items: center; gap: 5px; }
+.random-inputs input { width: 40px; background:#333; color:white; border:none; padding:5px; text-align:center; border-radius:4px; }
+
+/* STILI LABORATORIO */
+.lab-group { background: #222; border-radius: 8px; padding: 10px; margin-bottom: 10px; border: 1px solid #333; width: 100%; }
+.lab-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.9rem; }
+.lab-row input[type="color"] { width: 40px; height: 40px; padding: 0; border: none; border-radius: 5px; cursor: pointer; background: transparent; }
+.lab-row input[type="range"] { flex-grow: 1; margin: 0 10px; }
+.lab-row select { background: #111; color: white; border: 1px solid #444; padding: 5px; border-radius: 5px; }
+.btn-reset-lab { width: 100%; background: #444; padding: 10px; border-radius: 6px; font-size: 0.8rem; margin-top: 5px; }
+.btn-test-sound { background: var(--accent); padding: 5px 10px; font-size: 0.8rem; border-radius: 5px; }
+
+.backup-tools { display: flex; gap: 10px; margin-top: 15px; }
+.btn-tool { font-size: 0.75rem; padding: 10px; background: #444; flex: 1; border-radius: 8px; color:white; border:none; cursor:pointer; }
+</style>
+</head>
+
+<body>
+
+<button id="fs-btn" onclick="toggleFullscreen()">⛶ FULLSCREEN</button>
+<div id="total-display">SESSIONE: <span id="total-time">00:00</span></div>
+<button id="settings-btn" onclick="toggleSettings()">⚙️</button>
+
+<div id="round-display">ROUND 1</div>
+<div id="status-display">PRONTO?</div>
+<div id="time-display">00:00</div>
+
+<div class="controls">
+    <button id="btn-toggle" onclick="toggleTimer()">START</button>
+    <button onclick="resetTimer()">RESET</button>
+</div>
+
+<div id="settings-panel">
+
+    <!-- ================= VISTA 1: IMPOSTAZIONI PRINCIPALI ================= -->
+    <div id="settings-main" class="view-container">
+        <div class="setting-section">
+            <h3>PRESET ALLENAMENTO (V6.0)</h3>
+            <div id="presets-list"></div>
+            
+            <div id="active-preset-controls" style="display:none; margin-bottom:15px; padding:10px; background:rgba(33, 150, 243, 0.1); border-radius:8px; border:1px dashed var(--accent)">
+                <p style="margin:0 0 10px 0; font-size:0.8rem; color:var(--accent)">Modifiche in: <b id="active-preset-name"></b></p>
+                <button onclick="overwritePreset()" style="width:100%; background:var(--accent); padding:10px; border:none; border-radius:8px; color:white; font-weight:bold">AGGIORNA PRESET</button>
+            </div>
+
+            <div style="display:flex; gap:10px">
+                <input type="text" id="preset-name" placeholder="Nuovo nome..." style="flex-grow:1; padding:12px; border-radius:8px; background:#222; color:white; border:none">
+                <button onclick="saveCurrentAsPreset()" style="background:#444; color:white; border:none; border-radius:8px; padding:0 15px">SALVA NUOVO</button>
+            </div>
+
+            <div class="backup-tools">
+                <button class="btn-tool" onclick="exportData()">⬇ ESPORTA BACKUP</button>
+                <button class="btn-tool" onclick="document.getElementById('import-file').click()">⬆ IMPORTA BACKUP</button>
+                <input type="file" id="import-file" style="display:none" onchange="importData(event)">
+            </div>
+        </div>
+
+        <div class="setting-section">
+            <h3>STRUTTURA</h3>
+            
+            <div class="realtime-stats">
+                <div>TEMPO LAVORO: <span id="total-work-time" class="stat-val">00:00</span></div>
+                <div>TEMPO CIRCUITO: <span id="total-circuit-time" class="stat-val">00:00</span></div>
+            </div>
+
+            <div id="phases-list"></div>
+            <button onclick="addPhase()" style="width:100%; background:#444; padding:15px; border:none; border-radius:12px; color:white; font-weight:bold">+ AGGIUNGI FASE</button>
+        </div>
+
+        <!-- Pulsante per passare al Laboratorio -->
+        <button onclick="openLab()" style="background:transparent; border:2px solid var(--accent); width:100%; padding:15px; font-size:1rem; border-radius:12px; color:var(--accent); font-weight:bold; margin-bottom:15px;">
+            🧪 APRI LABORATORIO (Colori e Suoni)
+        </button>
+
+        <button onclick="toggleSettings()" style="background:var(--accent); width:100%; padding:20px; font-size:1.2rem; border:none; border-radius:12px; color:white; font-weight:bold">CHIUDI E APPLICA</button>
+    </div>
+
+
+    <!-- ================= VISTA 2: LABORATORIO (Nascosto di default) ================= -->
+    <div id="settings-lab" class="view-container" style="display:none;">
+        <div class="setting-section" style="border-bottom:none;">
+            <h3>🧪 LABORATORIO</h3>
+            <p style="font-size:0.8rem; color:#aaa; margin-top:0;">Personalizza l'aspetto e l'audio della tua sessione.</p>
+            
+            <div class="lab-group">
+                <div class="lab-row">
+                    <span>Colore LAVORO:</span>
+                    <input type="color" id="col-fight" onchange="updateColors()">
+                </div>
+                <div class="lab-row">
+                    <span>Colore RIPOSO:</span>
+                    <input type="color" id="col-rest" onchange="updateColors()">
+                </div>
+                <button class="btn-reset-lab" onclick="resetColors()">↺ Ripristina Colori Default</button>
+            </div>
+
+            <div class="lab-group">
+                <div class="lab-row">
+                    <span style="color:var(--accent); font-weight:bold;">Suono: GONG</span>
+                    <button class="btn-test-sound" onclick="audio.gong(); ensureAudio();">▶ TEST</button>
+                </div>
+                <div class="lab-row">
+                    <select id="wave-gong" onchange="updateAudioConfig()"><option value="square">Square</option><option value="sine">Sine</option><option value="sawtooth">Sawtooth</option><option value="triangle">Triangle</option></select>
+                    <input type="range" id="freq-gong" min="100" max="1500" step="10" oninput="updateAudioConfig()">
+                    <span id="val-gong" style="width:40px; text-align:right"></span>
+                </div>
+
+                <div class="lab-row" style="margin-top:15px">
+                    <span style="color:var(--accent); font-weight:bold;">Suono: TICK</span>
+                    <button class="btn-test-sound" onclick="audio.tick(); ensureAudio();">▶ TEST</button>
+                </div>
+                <div class="lab-row">
+                    <select id="wave-tick" onchange="updateAudioConfig()"><option value="square">Square</option><option value="sine">Sine</option><option value="sawtooth">Sawtooth</option><option value="triangle">Triangle</option></select>
+                    <input type="range" id="freq-tick" min="100" max="1500" step="10" oninput="updateAudioConfig()">
+                    <span id="val-tick" style="width:40px; text-align:right"></span>
+                </div>
+
+                <div class="lab-row" style="margin-top:15px">
+                    <span style="color:var(--accent); font-weight:bold;">Suono: SCATTO</span>
+                    <button class="btn-test-sound" onclick="audio.sprint(); ensureAudio();">▶ TEST</button>
+                </div>
+                <div class="lab-row">
+                    <select id="wave-sprint" onchange="updateAudioConfig()"><option value="square">Square</option><option value="sine">Sine</option><option value="sawtooth">Sawtooth</option><option value="triangle">Triangle</option></select>
+                    <input type="range" id="freq-sprint" min="100" max="1500" step="10" oninput="updateAudioConfig()">
+                    <span id="val-sprint" style="width:40px; text-align:right"></span>
+                </div>
+                
+                <button class="btn-reset-lab" onclick="resetAudio()">↺ Ripristina Suoni Default</button>
+            </div>
+        </div>
+
+        <!-- Pulsante per tornare indietro -->
+        <button onclick="closeLab()" style="background:#444; width:100%; padding:20px; font-size:1.1rem; border:none; border-radius:12px; color:white; font-weight:bold; margin-top:10px;">
+            ⬅ TORNA ALLE IMPOSTAZIONI
+        </button>
+    </div>
+
+</div>
+
+<script>
+// VALORI DI DEFAULT PER COLORI E SUONI
+const DEFAULT_THEME = { fight: '#2e7d32', rest: '#d32f2f' };
+const DEFAULT_AUDIO = {
+    gong: { type: 'square', freq: 200 },
+    tick: { type: 'square', freq: 800 },
+    sprint: { type: 'square', freq: 600 }
+};
+
+let config = { 
+    phases: [{type: 'fight', dur: 180, random: {active: false, min: 5, max: 10}}, {type: 'rest', dur: 60, random: {active: false, min: 5, max: 10}}],
+    theme: JSON.parse(JSON.stringify(DEFAULT_THEME)),
+    audio: JSON.parse(JSON.stringify(DEFAULT_AUDIO))
+};
+let presets = {};
+let state = { timeLeft: 0, totalTime: 0, currentRound: 1, phaseIndex: 0, isRunning: false, nextRandomTick: -1, lastLoadedPreset: null };
+let audioCtx, masterGain, compressor, wakeLock, lastTick;
+
+// COMPATIBILITÀ VECCHI SALVATAGGI
+function upgradeData() {
+    if (!config.theme) config.theme = JSON.parse(JSON.stringify(DEFAULT_THEME));
+    if (!config.audio) config.audio = JSON.parse(JSON.stringify(DEFAULT_AUDIO));
+}
+
+// AGGIORNAMENTO DINAMICO CSS VARIABILI
+function applyThemeToCSS() {
+    document.documentElement.style.setProperty('--fight', config.theme.fight);
+    document.documentElement.style.setProperty('--rest', config.theme.rest);
+}
+
+async function requestWakeLock() { if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch(e){} } }
+function releaseWakeLock() { if (wakeLock) { wakeLock.release(); wakeLock = null; } }
+
+function ensureAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        compressor = audioCtx.createDynamicsCompressor();
+        compressor.threshold.setValueAtTime(-10, audioCtx.currentTime);
+        compressor.knee.setValueAtTime(40, audioCtx.currentTime);
+        compressor.ratio.setValueAtTime(12, audioCtx.currentTime);
+        compressor.attack.setValueAtTime(0, audioCtx.currentTime);
+        compressor.release.setValueAtTime(0.25, audioCtx.currentTime);
+        masterGain = audioCtx.createGain();
+        masterGain.gain.setValueAtTime(6.0, audioCtx.currentTime); 
+        compressor.connect(masterGain);
+        masterGain.connect(audioCtx.destination);
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function play(f, t, d) {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = t; 
+    o.frequency.setValueAtTime(f, now);
+    g.gain.setValueAtTime(3.0, now);
+    g.gain.setValueAtTime(3.0, now + d);
+    g.gain.setValueAtTime(0.001, now + d + 0.001); 
+    o.connect(g); 
+    g.connect(compressor);
+    o.start(now); 
+    o.stop(now + d + 0.01);
+}
+
+const audio = { 
+    gong:()=>play(config.audio.gong.freq, config.audio.gong.type, 1.0), 
+    tick:()=>play(config.audio.tick.freq, config.audio.tick.type, 0.15), 
+    sprint:()=>play(config.audio.sprint.freq, config.audio.sprint.type, 0.8) 
+};
+
+// --- LOGICA NAVIGAZIONE MENU E LABORATORIO ---
+function openLab() {
+    document.getElementById('settings-main').style.display = 'none';
+    document.getElementById('settings-lab').style.display = 'flex';
+    updateLabUI();
+    // Scrolla in cima quando apri il lab
+    document.getElementById('settings-panel').scrollTop = 0;
+}
+
+function closeLab() {
+    document.getElementById('settings-lab').style.display = 'none';
+    document.getElementById('settings-main').style.display = 'flex';
+    // Scrolla in cima quando torni indietro
+    document.getElementById('settings-panel').scrollTop = 0;
+}
+
+function updateLabUI() {
+    document.getElementById('col-fight').value = config.theme.fight;
+    document.getElementById('col-rest').value = config.theme.rest;
+    
+    ['gong', 'tick', 'sprint'].forEach(k => {
+        document.getElementById(`wave-${k}`).value = config.audio[k].type;
+        document.getElementById(`freq-${k}`).value = config.audio[k].freq;
+        document.getElementById(`val-${k}`).textContent = config.audio[k].freq;
+    });
+}
+
+function updateColors() {
+    config.theme.fight = document.getElementById('col-fight').value;
+    config.theme.rest = document.getElementById('col-rest').value;
+    applyThemeToCSS(); save();
+}
+
+function updateAudioConfig() {
+    ['gong', 'tick', 'sprint'].forEach(k => {
+        config.audio[k].type = document.getElementById(`wave-${k}`).value;
+        config.audio[k].freq = parseInt(document.getElementById(`freq-${k}`).value);
+        document.getElementById(`val-${k}`).textContent = config.audio[k].freq;
+    });
+    save();
+}
+
+function resetColors() { config.theme = JSON.parse(JSON.stringify(DEFAULT_THEME)); updateLabUI(); applyThemeToCSS(); save(); }
+function resetAudio() { config.audio = JSON.parse(JSON.stringify(DEFAULT_AUDIO)); updateLabUI(); save(); }
+// ------------------------------
+
+function calculateTotals() {
+    let work = 0; let total = 0;
+    config.phases.forEach(p => {
+        total += p.dur;
+        if(p.type === 'fight') work += p.dur;
+    });
+    const f = (s) => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+    document.getElementById("total-work-time").textContent = f(work);
+    document.getElementById("total-circuit-time").textContent = f(total);
+}
+
+function renderPhases() {
+    const container = document.getElementById("phases-list"); container.innerHTML = "";
+    config.phases.forEach((p, idx) => {
+        const div = document.createElement("div"); div.className = "phase-item";
+        div.innerHTML = `
+            <div class="phase-header">
+                <div class="sort-controls">
+                    <button class="btn-sort" ${idx===0?'disabled':''} onclick="moveP(${idx},-1)">▲</button>
+                    <button class="btn-sort" ${idx===config.phases.length-1?'disabled':''} onclick="moveP(${idx},1)">▼</button>
+                </div>
+                <input type="number" class="phase-dur-input" value="${p.dur}" onchange="config.phases[${idx}].dur=parseInt(this.value);save();calculateTotals()">
+                <div class="type-toggle ${p.type==='fight'?'type-fight':'type-rest'}" onclick="config.phases[${idx}].type=(config.phases[${idx}].type==='fight'?'rest':'fight');renderPhases();save();calculateTotals()">
+                    ${p.type==='fight'?'LAVORO':'RIPOSO'}
+                </div>
+                <button onclick="clonePhase(${idx})" style="background:#444; border:none; padding:8px 12px; border-radius:5px; color:white; margin-right:5px">📄</button>
+                <button onclick="config.phases.splice(${idx},1);renderPhases();save();calculateTotals()" style="background:#444; border:none; padding:8px 12px; border-radius:5px; color:white">✕</button>
+            </div>
+            ${p.type==='fight' ? `
+            <div class="phase-random-settings">
+                <button class="random-toggle-btn ${p.random.active?'random-active':''}" onclick="config.phases[${idx}].random.active=!config.phases[${idx}].random.active;renderPhases();save()">⚡ SCATTI ${p.random.active?'ON':'OFF'}</button>
+                <div class="random-inputs">
+                    <input type="number" value="${p.random.min}" onchange="config.phases[${idx}].random.min=parseInt(this.value);save()"> - 
+                    <input type="number" value="${p.random.max}" onchange="config.phases[${idx}].random.max=parseInt(this.value);save()"> s
+                </div>
+            </div>` : ''}`;
+        container.appendChild(div);
+    });
+    calculateTotals();
+}
+
+function moveP(i, d) { [config.phases[i], config.phases[i+d]] = [config.phases[i+d], config.phases[i]]; save(); renderPhases(); }
+
+function addPhase() {
+    let newPhase;
+    if (config.phases.length > 0) {
+        newPhase = JSON.parse(JSON.stringify(config.phases[config.phases.length - 1]));
+    } else {
+        newPhase = {type:'fight', dur:60, random:{active:false, min:5, max:10}};
+    }
+    config.phases.push(newPhase);
+    save();
+    renderPhases();
+}
+
+function clonePhase(idx) {
+    const cloned = JSON.parse(JSON.stringify(config.phases[idx]));
+    config.phases.splice(idx + 1, 0, cloned);
+    save();
+    renderPhases();
+}
+
+function renderPresets() {
+    const c = document.getElementById("presets-list"); c.innerHTML = "";
+    for (let n in presets) {
+        const d = document.createElement("div"); d.className = "preset-item";
+        d.innerHTML = `
+            <button class="btn-preset-load ${state.lastLoadedPreset===n?'active':''}" onclick="applyP('${n}')">${n}</button>
+            <button class="btn-preset-icon" onclick="renamePreset('${n}')">✎</button>
+            <button class="btn-preset-icon btn-preset-del" onclick="deletePreset('${n}')">✕</button>`;
+        c.appendChild(d);
+    }
+}
+
+function deletePreset(name) { if(confirm(`Eliminare "${name}"?`)) { delete presets[name]; save(); renderPresets(); } }
+
+function renamePreset(oldName) {
+    const newName = prompt("Nuovo nome per questo preset:", oldName);
+    if (newName && newName.trim() !== "" && newName !== oldName) {
+        presets[newName] = presets[oldName];
+        delete presets[oldName];
+        if(state.lastLoadedPreset === oldName) state.lastLoadedPreset = newName;
+        save(); renderPresets();
+    }
+}
+
+function applyP(n) { 
+    state.lastLoadedPreset = n; config = JSON.parse(JSON.stringify(presets[n]));
+    upgradeData(); applyThemeToCSS(); updateLabUI();
+    document.getElementById("active-preset-controls").style.display = "block";
+    document.getElementById("active-preset-name").textContent = n;
+    renderPhases(); renderPresets(); initTimer(); 
+}
+function overwritePreset() { if(state.lastLoadedPreset){ presets[state.lastLoadedPreset] = JSON.parse(JSON.stringify(config)); save(); alert("Preset Aggiornato!"); } }
+function saveCurrentAsPreset() {
+    const n = document.getElementById("preset-name").value.trim(); if(!n) return;
+    presets[n] = JSON.parse(JSON.stringify(config)); applyP(n); document.getElementById("preset-name").value = "";
+}
+
+function exportData() {
+    const data = { config, presets };
+    const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'boxing_timer_v6_backup.json'; a.click();
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const imported = JSON.parse(e.target.result);
+            if(imported.config) config = imported.config;
+            if(imported.presets) presets = imported.presets;
+            upgradeData(); applyThemeToCSS(); updateLabUI();
+            save(); renderPhases(); renderPresets(); initTimer(); alert("Backup caricato con successo!");
+        } catch(err) { alert("File non valido"); }
+    };
+    reader.readAsText(file);
+}
+
+function setNextR() {
+    const p = config.phases[state.phaseIndex];
+    if(p.type==='fight' && p.random.active) {
+        state.nextRandomTick = state.timeLeft - (Math.floor(Math.random() * (p.random.max - p.random.min + 1)) + p.random.min);
+    } else state.nextRandomTick = -1;
+}
+
+function tick() {
+    if(!state.isRunning) return;
+    state.totalTime++;
+    if(state.timeLeft > 1) {
+        state.timeLeft--;
+        if(config.phases[state.phaseIndex].type === 'rest' && state.timeLeft <= 3) audio.tick();
+        if(state.nextRandomTick !== -1 && state.timeLeft <= state.nextRandomTick) { audio.sprint(); setNextR(); }
+    } else nextPh();
+    updateUI();
+}
+
+function nextPh() {
+    audio.gong(); state.phaseIndex++;
+    if(state.phaseIndex >= config.phases.length) { state.phaseIndex = 0; state.currentRound++; }
+    state.timeLeft = config.phases[state.phaseIndex].dur;
+    document.getElementById("status-display").textContent = config.phases[state.phaseIndex].type === 'fight' ? "COMBATTI!" : "RIPOSO";
+    setNextR(); updateTheme();
+}
+
+async function toggleTimer() {
+    ensureAudio();
+    const btn = document.getElementById("btn-toggle");
+    if(state.isRunning) { 
+        state.isRunning = false; 
+        releaseWakeLock(); 
+        btn.textContent = "RIPRENDI";
+    }
+    else {
+        state.isRunning = true; 
+        await requestWakeLock(); 
+        btn.textContent = "PAUSA";
+        if(document.getElementById("status-display").textContent === "PRONTO?"){
+            audio.gong(); 
+            document.getElementById("status-display").textContent = config.phases[0].type === 'fight' ? "COMBATTI!" : "RIPOSO"; 
+            setNextR();
+        }
+        lastTick = performance.now();
+        requestAnimationFrame(function lp(now){
+            if(!state.isRunning) return;
+            if(now - lastTick >= 1000){ tick(); lastTick = now - ((now - lastTick)%1000); }
+            requestAnimationFrame(lp);
+        });
+    }
+}
+
+function save() { 
+    localStorage.setItem('boxing_timer_config', JSON.stringify(config)); 
+    localStorage.setItem('boxing_timer_presets', JSON.stringify(presets)); 
+}
+
+function load() {
+    const c = localStorage.getItem('boxing_timer_config') || localStorage.getItem('box_v48_c');
+    const p = localStorage.getItem('boxing_timer_presets') || localStorage.getItem('box_v48_p');
+    
+    if(c) config = JSON.parse(c); 
+    if(p) presets = JSON.parse(p);
+    
+    upgradeData(); 
+    applyThemeToCSS();
+    updateLabUI();
+    renderPhases(); 
+    renderPresets();
+}
+
+function updateUI() {
+    const m = Math.floor(state.timeLeft/60), s = state.timeLeft%60;
+    document.getElementById("time-display").textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    const tm = Math.floor(state.totalTime/60), ts = state.totalTime%60;
+    document.getElementById("total-time").textContent = `${String(tm).padStart(2,'0')}:${String(ts).padStart(2,'0')}`;
+    document.getElementById("round-display").textContent = `ROUND ${state.currentRound}`;
+}
+
+function updateTheme() {
+    document.body.classList.remove("fight-mode","rest-mode");
+    document.body.classList.add(config.phases[state.phaseIndex].type==='fight'?'fight-mode':'rest-mode');
+}
+
+function initTimer() { 
+    state.timeLeft = config.phases[0].dur; 
+    state.totalTime = 0; 
+    state.currentRound = 1; 
+    state.phaseIndex = 0;
+    state.isRunning = false;
+    document.getElementById("btn-toggle").textContent = "START";
+    document.getElementById("status-display").textContent = "PRONTO?";
+    updateUI(); 
+    updateTheme(); 
+}
+
+function toggleSettings() { 
+    const s = document.getElementById("settings-panel"); 
+    if (s.style.display === 'flex') {
+        s.style.display = 'none';
+        initTimer(); 
+    } else {
+        s.style.display = 'flex';
+        // ASSICURA DI APRIRE SEMPRE SULLA VISTA PRINCIPALE
+        document.getElementById('settings-main').style.display = 'flex';
+        document.getElementById('settings-lab').style.display = 'none';
+        calculateTotals();
+    }
+}
+
+function toggleFullscreen() { if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+
+function resetTimer() { 
+    state.isRunning = false;
+    releaseWakeLock();
+    initTimer();
+}
+
+load(); 
+initTimer();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            window.location.reload();
+          }
+        });
+      });
+    });
+  });
+}
+</script>
+</body>
+</html>

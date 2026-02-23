@@ -1,0 +1,23 @@
+{
+  "name": "Boxing Timer V6.0 Beta",
+  "short_name": "Boxing V6 Beta",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#2196F3",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
