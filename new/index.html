@@ -422,9 +422,13 @@ function applyP(n) {
     renderPhases(); renderPresets(); initTimer(); 
 }
 function overwritePreset() { if(state.lastLoadedPreset){ presets[state.lastLoadedPreset] = JSON.parse(JSON.stringify(config)); save(); alert("Preset Aggiornato!"); } }
+
+// ECCO LA MODIFICA: AGGIUNTO IL COMANDO SAVE()
 function saveCurrentAsPreset() {
     const n = document.getElementById("preset-name").value.trim(); if(!n) return;
-    presets[n] = JSON.parse(JSON.stringify(config)); applyP(n); document.getElementById("preset-name").value = "";
+    presets[n] = JSON.parse(JSON.stringify(config)); 
+    save(); // <--- ORA SALVA SUBITO!
+    applyP(n); document.getElementById("preset-name").value = "";
 }
 
 function exportData() {
