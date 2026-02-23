@@ -1,9 +1,9 @@
 {
   "name": "Boxing Timer V6.0 Beta",
   "short_name": "Boxing V6 Beta",
-  "id": "./",
-  "scope": "./",
+  "id": "/BoxingTimer/new/",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#2196F3",
