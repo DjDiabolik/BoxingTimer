@@ -1,25 +1,15 @@
 {
   "name": "Boxing Timer Beta",
   "short_name": "Boxing Timer Beta",
-  "id": "Boxing-Time-Beta",
-  "start_url": "./index.html",
-  "scope": "./",
+  "id": "/BoxingTimer/new/",
+  "start_url": "/BoxingTimer/new/index.html",
+  "scope": "/BoxingTimer/new/",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#2196F3",
   "orientation": "portrait",
   "icons": [
-    {
-      "src": "./icon.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "./icon.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    { "src": "/BoxingTimer/new/icon.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/BoxingTimer/new/icon.png", "sizes": "192x192", "type": "image/png" }
   ]
 }

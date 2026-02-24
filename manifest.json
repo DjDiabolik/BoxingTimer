@@ -1,25 +1,15 @@
 {
   "name": "Boxing Timer",
   "short_name": "Boxing Timer",
-  "id": "Boxing-Timer-Stable",
-  "start_url": "./index.html",
-  "scope": "./",
+  "id": "/BoxingTimer/",
+  "start_url": "/BoxingTimer/index.html",
+  "scope": "/BoxingTimer/",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#1b5e20",
   "orientation": "portrait",
   "icons": [
-    {
-      "src": "./icon.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "./icon.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    { "src": "/BoxingTimer/icon.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/BoxingTimer/icon.png", "sizes": "192x192", "type": "image/png" }
   ]
 }
