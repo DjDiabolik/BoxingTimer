@@ -1,5 +1,11 @@
+// /BoxingTimer/sw.js
 const CACHE_NAME = 'boxing-timer-stable';
-const assets = ['./', './index.html', './manifest.json', './icon.png'];
+const assets = [
+  '/BoxingTimer/',
+  '/BoxingTimer/index.html',
+  '/BoxingTimer/manifest.json',
+  '/BoxingTimer/icon.png'
+];
 
 self.addEventListener('install', e => {
   self.skipWaiting();
@@ -10,29 +16,33 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(keys.map(key => {
-        // Cancella eventuali vecchie cache con i numeri, ma IGNORA la beta
+    caches.keys().then(keys => Promise.all(
+      keys.map(key => {
         if (key !== CACHE_NAME && !key.includes('beta')) {
           return caches.delete(key);
         }
-      }));
-    })
+      })
+    ))
   );
-  self.clients.claim();
+  // NOTA: non chiamiamo self.clients.claim() qui per evitare takeover immediato di /new/
 });
 
-// LOGICA "SMART NETWORK-FIRST": Scarica da internet e aggiorna la cache in automatico!
 self.addEventListener('fetch', e => {
-  e.respondWith(
-    fetch(e.request).then(response => {
-      // Se c'è internet, salva la copia più recente in cache per quando sarai offline
-      const responseClone = response.clone();
-      caches.open(CACHE_NAME).then(cache => cache.put(e.request, responseClone));
-      return response;
-    }).catch(() => {
-      // Se sei in palestra senza rete, pesca dalla cache
-      return caches.match(e.request);
-    })
-  );
+  try {
+    const url = new URL(e.request.url);
+    // Interveniamo solo per richieste dentro /BoxingTimer/ ma NON per /BoxingTimer/new/
+    if (url.pathname.startsWith('/BoxingTimer/') && !url.pathname.startsWith('/BoxingTimer/new/')) {
+      e.respondWith(
+        fetch(e.request).then(response => {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(e.request, responseClone));
+          return response;
+        }).catch(() => caches.match(e.request))
+      );
+    }
+    // Altrimenti non facciamo nulla: lascia che la richiesta sia gestita dal browser o da un altro SW
+  } catch (err) {
+    // Se qualcosa va storto, non interferire
+  }
 });
+

@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<link rel="manifest" href="./manifest.json">
+<link rel="manifest" href="/BoxingTimer/new/manifest.json">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>BOXING TIMER V6.0 BETA</title>
 
@@ -578,16 +578,19 @@ initTimer();
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').then(reg => {
-      reg.addEventListener('updatefound', () => {
-        const newWorker = reg.installing;
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            window.location.reload();
-          }
+    navigator.serviceWorker.register('/BoxingTimer/new/sw.js', { scope: '/BoxingTimer/new/' })
+      .then(reg => {
+        console.log('SW beta registrato', reg.scope);
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              window.location.reload();
+            }
+          });
         });
-      });
-    });
+      })
+      .catch(err => console.error('SW beta errore', err));
   });
 }
 </script>

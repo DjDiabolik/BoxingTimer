@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<link rel="manifest" href="./manifest.json">
+<link rel="manifest" href="/BoxingTimer/manifest.json">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>BOXING TIMER V5.4.2</title>
 
@@ -407,19 +407,19 @@ initTimer();
 // 2. REGISTRAZIONE SERVICE WORKER CON REFRESH INTELLIGENTE
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').then(reg => {
-      // Controlla se c'è un aggiornamento ogni volta che apri l'app
-      reg.addEventListener('updatefound', () => {
-        const newWorker = reg.installing;
-        newWorker.addEventListener('statechange', () => {
-          // Se l'aggiornamento è installato e l'app era già aperta
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            // Ricarica la pagina per attivare la nuova versione (es. la 5.4)
-            window.location.reload();
-          }
+    navigator.serviceWorker.register('/BoxingTimer/sw.js', { scope: '/BoxingTimer/' })
+      .then(reg => {
+        console.log('SW stable registrato', reg.scope);
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              window.location.reload();
+            }
+          });
         });
-      });
-    });
+      })
+      .catch(err => console.error('SW stable errore', err));
   });
 }
 </script>
