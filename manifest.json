@@ -1,7 +1,9 @@
 {
-  "name": "Boxing Timer 5.4.2",
-  "short_name": "BoxingTime 5.4.2",
+  "name": "Boxing Timer",
+  "short_name": "Boxing Timer",
+  "id": "Boxing-Timer-Stable",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#1b5e20",

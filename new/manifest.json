@@ -1,7 +1,7 @@
 {
-  "name": "Boxing Timer V6.0 Beta",
-  "short_name": "Boxing V6 Beta",
-  "id": "/BoxingTimer/new/",
+  "name": "Boxing Timer Beta",
+  "short_name": "Boxing Timer Beta",
+  "id": "Boxing-Time-Beta",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
